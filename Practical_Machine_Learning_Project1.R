@@ -10,19 +10,23 @@ library(caret)
 
 # Create data directory
 if(!file.exists("./data")){dir.create("./data")}
+
 # Download train file
 urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
 download.file(urls, "./data/pml-training.csv")
+
 # Download test file
 urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
 download.file(urls, "./data/pml-testing.csv")
+
 # Change to data directory
 setwd("./data/")
+
 # Load datasets
 training <- read.csv("pml-training.csv", header=TRUE, sep=",",
                      stringsAsFactors=FALSE)
-testing  <- read.csv("pml-testing.csv", header=TRUE, sep=",",
-                     stringsAsFactors=FALSE)
+testing  <- read.table("pml-testing.csv", header=TRUE, sep=",",
+                       stringsAsFactors=FALSE)
 
 ################################################################################
 # Some analysis
