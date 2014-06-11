@@ -55,13 +55,6 @@ table(classes1)
 classes2 <- sapply(testing[1,], class)
 table(classes2)
 
-classes0 <- classes2
-classes0[classes2=="logical"] <- "numeric"
-table(classes0)
-
-testing  <- read.table("pml-testing.csv", header=TRUE, sep=",",
-                       stringsAsFactors=FALSE, colClasses=classes0)
-
 ################################################################################
 # Change some classes
 training$classe         <- as.factor(training$classe)
@@ -77,27 +70,10 @@ testing$new_window     <- factor(testing$new_window, labels=c("no", "yes"),
 # testing$cvtd_timestamp <- as.POSIXct(strptime(testing$cvtd_timestamp, 
 #                                                "%d/%m/%Y %H:%M"))
 
-classes1[classes1=="character"]
-names(classes1[classes1=="character"])
-classes_character <- names(classes1[classes1=="character"])
-summary(training[, classes_character])
-# temp  <- training
-# temp2 <- testing
-sapply(training[, classes_character], as.double(as.character))
-# summary(temp[, names(classes[classes=="character"])])
-
-table(training$classe)
-table(training$user_name)
-table(training$new_window)
-table(training$classe, training$new_window)
-table(training$classe, training$num_window)
-plot(training$classe, training$num_window)
-
-
-table(training$min_yaw_forearm)
-table(training$max_yaw_forearm)
-table(training$cvtd_timestamp)
-table(training$new_window)
+classes1 <- sapply(training[1,], class)
+table(classes1)
+classes2 <- sapply(testing[1,], class)
+table(classes2)
 
 for (i in 1:34) {
       print(classes_character[i])
@@ -113,6 +89,27 @@ for (i in 2:34) {
       print(class(training[, classes_character[i]]))
 }
 
+classes1[classes1=="character"]
+names(classes1[classes1=="character"])
+classes_character <- names(classes1[classes1=="character"])
+summary(training[, classes_character])
+
+sapply(training[, classes_character], as.numeric)
+classes1 <- sapply(training[1,], class)
+table(classes1)
+
+table(training$classe)
+table(training$user_name)
+table(training$new_window)
+table(training$classe, training$new_window)
+table(training$classe, training$num_window)
+plot(training$classe, training$num_window)
+
+table(training$min_yaw_forearm)
+table(training$max_yaw_forearm)
+table(training$cvtd_timestamp)
+table(training$new_window)
+
 summary(training)
 sapply(training[1,], class)
 
@@ -126,7 +123,7 @@ for (i in 1:100) {
       print(table(testing[, classes2_logical[i]]))
 }
 
-for (i in 2:100) {
+for (i in 1:100) {
       # testing[, classes2_logical[i]] <- as.numeric(as.character(testing[, classes2_logical[i]]))
       testing[, classes2_logical[i]] <- as.numeric(testing[, classes2_logical[i]])
       print(classes2_logical[i])
@@ -137,10 +134,11 @@ for (i in 2:100) {
 summary(testing)
 sapply(testing[1,], class)
 
-classes2b <- sapply(testing[1,], class)
-table(classes2b)
+classes2 <- sapply(testing[1,], class)
+table(classes2)
+table(classes1)
 
-
+table(classes1, classes2)
 
 save(training, file="training.RData")
 save(testing,  file="testing.RData")
@@ -152,6 +150,11 @@ save(testing,  file="testing.RData")
 
 ################################################################################
 # Models
+
+mod1 <- train(wage ~., method="glm", data=training)
+mod2 <- train(wage ~., method="rf",
+              data=training, 
+              trControl = trainControl(method="cv"), number=3)
 
 ################################################################################
 
