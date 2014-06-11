@@ -166,13 +166,27 @@ names(model6)
 pred6 <- predict(model6, newdata=testing)
 ctrl <- trainControl(method="cv", number=10)
 model7 <- train(classe ~., data=training, method="treebag", trControl=ctrl)
+names(model7)
+pred7 <- predict(model7, newdata=testing)
 # Here, a partial least squares discriminant analysis (PLSDA) model 
-model8 <- train(classe ~., data=training, method = "pls",
-                # Center and scale the predictors for the training
-                # set and all future samples.
-                preProc = c("center", "scale")))
-model4 <- train(classe ~., data=training)
-model4 <- train(classe ~., data=training)
+model8  <- train(classe ~., data=training, method="pls",
+                 # Center and scale the predictors for the training
+                 # set and all future samples.
+                 preProc = c("center", "scale"))
+model9  <- train(classe ~., data=training, method="bag")
+
+model10 <- train(classe ~., data=training, method="svmRadial",
+                 # This pre-processing will be applied to
+                 # these data and new samples too.
+                 preProc=c("center", "scale"),
+                 # Tune over different values of cost
+                 tuneLength=10, trControl=ctrl, metric="ROC")
+
+library(ipred)
+model20 <- bagging(classe ~., data=training, nbagg=25)
+pred20_train <- predict(model20, training)
+table(pred20_train, training$classe)
+
 
 
 ctrl <- trainControl(method = "cv", number = 10,
@@ -194,11 +208,7 @@ m <- train(default ~ ., data = credit, method = "C5.0",
            tuneGrid = grid)
 m
 
-library(ipred)
-set.seed(300)
-mybag <- bagging(default ~ ., data = credit, nbagg = 25)
-credit_pred <- predict(mybag, credit)
-table(credit_pred, credit$default)
+
 
 
 
