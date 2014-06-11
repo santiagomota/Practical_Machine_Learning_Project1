@@ -151,10 +151,124 @@ save(testing,  file="testing.RData")
 ################################################################################
 # Models
 
-mod1 <- train(wage ~., method="glm", data=training)
-mod2 <- train(wage ~., method="rf",
-              data=training, 
-              trControl = trainControl(method="cv"), number=3)
+model1 <- train(classe ~., method="glm", data=training, 
+                preProcess=c("center", "scale"))
+model2 <- train(classe ~., method="rf",
+                data=training, 
+                trControl = trainControl(method="cv"), number=3)
+model3 <- train(classe ~., method="lda", data=training)
+model4 <- train(classe ~., method="nb", data=training)
+model5 <- train(classe ~., method = "C5.0", data=training)
+ctrl <- trainControl(method = "repeatedcv",
+                     repeats = 5)
+model6 <- train(classe ~., method="gbm", data=training, trControl=ctrl)
+names(model6)
+pred6 <- predict(model6, newdata=testing)
+ctrl <- trainControl(method="cv", number=10)
+model7 <- train(classe ~., data=training, method="treebag", trControl=ctrl)
+# Here, a partial least squares discriminant analysis (PLSDA) model 
+model8 <- train(classe ~., data=training, method = "pls",
+                # Center and scale the predictors for the training
+                # set and all future samples.
+                preProc = c("center", "scale")))
+model4 <- train(classe ~., data=training)
+model4 <- train(classe ~., data=training)
+
+
+ctrl <- trainControl(method = "cv", number = 10,
+                     selectionFunction = "oneSE")
+
+# use expand.grid() to create grid of tuning parameters
+grid <- expand.grid(.model = "tree",
+                    .trials = c(1, 5, 10, 15, 20, 25, 30, 35),
+                    .winnow = "FALSE")
+
+# look at the result of expand.grid()
+grid
+
+# customize train() with the control list and grid of parameters 
+set.seed(300)
+m <- train(default ~ ., data = credit, method = "C5.0",
+           metric = "Kappa",
+           trControl = ctrl,
+           tuneGrid = grid)
+m
+
+library(ipred)
+set.seed(300)
+mybag <- bagging(default ~ ., data = credit, nbagg = 25)
+credit_pred <- predict(mybag, credit)
+table(credit_pred, credit$default)
+
+
+
+vmbag <- train(default ~ ., data = credit, "bag",
+               trControl = ctrl, bagControl = bagctrl)
+
+# auto-tune a random forest
+grid_rf <- expand.grid(.mtry = c(2, 4, 8, 16))
+
+set.seed(300)
+m_rf <- train(default ~ ., data = credit, method = "rf",
+              metric = "Kappa", trControl = ctrl,
+              tuneGrid = grid_rf)
+
+
+
+rdaGrid = data.frame(gamma = (0:4)/4, lambda = 3/4)
+set.seed(123)
+rdaFit <- train(Class ~ .,
+                data = training,
+                method = "rda",
+                tuneGrid = rdaGrid,
+                trControl = ctrl,
+                metric = "ROC")
+
+gbmTune <- train(x = churnTrain[, predictors],
+                 y = churnTrain$churn,
+                 method = "gbm")
+
+# or, using the formula interface
+gbmTune <- train(churn ~ ., data = churnTrain, method = "gbm")
+
+ctrl <- trainControl(method = "repeatedcv", repeats = 5,
+                     classProbs = TRUE,
+                     summaryFunction = twoClassSummary)
+gbmTune <- train(churn ~ ., data = churnTrain,
+                 method = "gbm",
+                 metric = "ROC",
+                 verbose = FALSE,
+                 trControl = ctrl)
+
+svmTune <- train(churn ~ . , data = churnTrain,
+                 # Tell it to fit a SVM model and tune
+                 # over Cost and the RBF parameter
+                 method = "svmRadial",
+                 # This pre-processing will be applied to
+                 # these data and new samples too.
+                 preProc = c("center", "scale"),
+                 # Tune over different values of cost
+                 tuneLength = 10,
+                 trControl = ctrl,
+                 metric = "ROC")
+
+modFit <- train(eruptions ~ waiting, data=trainFaith, method="lm")
+summary(modFit$finalModel)
+
+modFit <- train(Species ~ ., method="rpart", data=training)
+print(modFit$finalModel)
+
+modFit <- train(Species~ ., data=training, method="rf", prox=TRUE)
+modFit
+
+modFit <- train(wage ~ ., method="gbm", data=training, verbose=FALSE)
+print(modFit)
+
+# Plot the results
+qplot(predict(modFit, testing), wage, data=testing)
+
+
+
 
 ################################################################################
 
