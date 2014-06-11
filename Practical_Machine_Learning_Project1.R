@@ -25,17 +25,17 @@ setwd("./data/")
 # Load datasets
 training <- read.csv("pml-training.csv", header=TRUE, sep=",",
                      stringsAsFactors=FALSE)
-testing  <- read.table("pml-testing.csv", header=TRUE, sep=",",
-                       stringsAsFactors=FALSE)
+testing  <- read.csv("pml-testing.csv", header=TRUE, sep=",",
+                     stringsAsFactors=FALSE)
 
 ################################################################################
 # Some analysis
 str(training)
 summary(training)
 
+# Classe class
 table(training$classe)
 table(testing$classe)
-
 summary(training$classe)
 str(training$classe)
 
@@ -47,6 +47,20 @@ featurePlot(x=training[,c("user_name","new_window","num_window", "X")],
 
 names(training)
 sapply(training[1,], class)
+
+# Print class of all variables in dataset
+sapply(training[1,], class)
+classes1 <- sapply(training[1,], class)
+table(classes1)
+classes2 <- sapply(testing[1,], class)
+table(classes2)
+
+classes0 <- classes2
+classes0[classes2=="logical"] <- "numeric"
+table(classes0)
+
+testing  <- read.table("pml-testing.csv", header=TRUE, sep=",",
+                       stringsAsFactors=FALSE, colClasses=classes0)
 
 ################################################################################
 # Change some classes
@@ -63,13 +77,9 @@ testing$new_window     <- factor(testing$new_window, labels=c("no", "yes"),
 # testing$cvtd_timestamp <- as.POSIXct(strptime(testing$cvtd_timestamp, 
 #                                                "%d/%m/%Y %H:%M"))
 
-# Print class of all variables in dataset
-sapply(training[1,], class)
-classes <- sapply(training[1,], class)
-table(classes)
-classes[classes=="character"]
-names(classes[classes=="character"])
-classes_character <- names(classes[classes=="character"])
+classes1[classes1=="character"]
+names(classes1[classes1=="character"])
+classes_character <- names(classes1[classes1=="character"])
 summary(training[, classes_character])
 # temp  <- training
 # temp2 <- testing
@@ -106,8 +116,6 @@ for (i in 2:34) {
 summary(training)
 sapply(training[1,], class)
 
-classes2 <- sapply(testing[1,], class)
-table(classes2)
 classes2[classes2=="logical"]
 names(classes2[classes2=="logical"])
 classes2_logical <- names(classes2[classes2=="logical"])
