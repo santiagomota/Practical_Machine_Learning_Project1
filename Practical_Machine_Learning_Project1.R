@@ -223,7 +223,7 @@ testing_mod3 <- testing[,new_names]
 testing_mod3$cvtd_timestamp <- testing$cvtd_timestamp
 testing_mod3$classe         <- testing$classe
 ################################################################################
-# Models
+# Models. We use the training_mod3 dataset. 57 + classe variables
 
 # Random Forest
 model30 <- train(classe ~., method="rf", data=training_mod3, 
