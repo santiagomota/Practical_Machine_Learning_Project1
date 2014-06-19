@@ -160,7 +160,8 @@ training_mod$user_name <- training$user_name
 testing_mod$user_name  <- testing$user_name
 training_mod$classe    <- training$classe
 
-# Complete DF
+# Complete DF with training and testing data. We change classe variable to numeric
+# Values of test set are classe = 6
 temp <- training
 temp$classe <- as.numeric(temp$classe)
 temp2 <- testing
@@ -169,11 +170,13 @@ temp2$classe <- 6
 
 all <- rbind(temp, temp2)
 
+# Delete temp DF
 rm(temp)
 rm(temp2)
 
 names(all)
 
+# One DF only with 4 columns 
 minimum <- all[, c(2,5,6,160)]
 
 minimum$cvtd_timestamp <- as.POSIXct(strptime(minimum$cvtd_timestamp, "%d/%m/%Y %H:%M"))
