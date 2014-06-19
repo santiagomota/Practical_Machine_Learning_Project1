@@ -204,11 +204,14 @@ names(pca.out)
 
 # Correlation
 M_cor <- abs(cor(training[,-c(2, 5, 6, 160)]))
+M_cor
 diag(M_cor) <- 0
 which(M_cor>0.8, arr.ind=T)
 
+# variables with cor > 0.8
 new_names <- row.names(which(M_cor>0.8, arr.ind=T))
 new_names
+# New Df with variables with cor > 0.8. We also include timestamp and classe
 training_mod3 <- training[,new_names]
 training_mod3$cvtd_timestamp <- training$cvtd_timestamp
 training_mod3$classe         <- training$classe
