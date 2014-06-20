@@ -143,7 +143,6 @@ table(classes1, classes2)
 save(training, file="training.RData")
 save(testing,  file="testing.RData")
 
-
 # apply normalization to entire data frame
 # library(BiocGenerics)
 # training_norm <- as.data.frame(lapply(training, normalize))
@@ -177,7 +176,7 @@ rm(temp2)
 names(all)
 
 # One DF only with 4 columns 
-minimum <- all[, c(2,5,6,160)]
+minimum <- all[, c(2, 5, 6, 160)]
 
 minimum$cvtd_timestamp <- as.POSIXct(strptime(minimum$cvtd_timestamp, "%d/%m/%Y %H:%M"))
 minimum <- minimum[order(minimum$user_name, minimum$cvtd_timestamp),]
@@ -191,7 +190,7 @@ qplot(cvtd_timestamp, classe, data=all, geom="jitter", colour=factor(user_name),
       main="Classe by time", ylab="Classe", xlab="Time") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-# Principal componets analysis
+# Principal components analysis
 pca.out <- prcomp(training_mod[, -c(57, 58)], scale.=TRUE)
 pca.out
 summary(pca.out)
@@ -204,22 +203,23 @@ str(pca.out)
 pca.out$rotation
 names(pca.out)
 
-
-# Correlation
+# Correlation. Only numeric variables
 M_cor <- abs(cor(training[,-c(2, 5, 6, 160)]))
 M_cor
 diag(M_cor) <- 0
 which(M_cor>0.8, arr.ind=T)
 
-# variables with cor > 0.8
+# variables with correlation > 0.8
 new_names <- row.names(which(M_cor>0.8, arr.ind=T))
 new_names
-# New Df with variables with cor > 0.8. We also include timestamp and classe
-training_mod3 <- training[,new_names]
+
+# New DF with variables with cor > 0.8. We also include timestamp and classe
+training_mod3 <- training[, new_names]
 training_mod3$cvtd_timestamp <- training$cvtd_timestamp
 training_mod3$classe         <- training$classe
 
-testing_mod3 <- testing[,new_names]
+# Same for testing 
+testing_mod3 <- testing[, new_names]
 testing_mod3$cvtd_timestamp <- testing$cvtd_timestamp
 testing_mod3$classe         <- testing$classe
 ################################################################################
@@ -235,7 +235,6 @@ print(model30)
 pred30
 confusionMatrix(pred30_train, training_mod3$classe)
 
-### Best one
 # Bagging 
 library(ipred)
 model31 <- bagging(classe ~., data=training_mod3, nbagg=25)
@@ -254,6 +253,9 @@ pred32 <- predict(model32, testing_mod3)
 print(model32)
 pred32
 confusionMatrix(pred32_train, training_mod3$classe)
+
+# All models made same prediction: B A B A A E D B A A B C B A E E A B B B on
+# test set
 
 ################################################################################
 # Prediction Assignment Submission: Instructions Help
