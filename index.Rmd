@@ -389,6 +389,12 @@ print(model30)
 ## Random Forest
 ```{r}
 pred30
+```
+
+---
+
+## Random Forest
+```{r}
 confusionMatrix(pred30_train, training_mod3$classe)
 ```
 
@@ -415,6 +421,12 @@ print(model31)
 ## Bagging
 ```{r}
 pred31
+```
+
+---
+
+## Bagging
+```{r}
 confusionMatrix(pred31_train, training_mod3$classe)
 ```
 
@@ -440,12 +452,16 @@ print(model32)
 ## C5.0
 ```{r}
 pred32
-confusionMatrix(pred32_train, training_mod3$classe)
 ```
 
 ---
 
+## C5.0
+```{r}
+confusionMatrix(pred32_train, training_mod3$classe)
+```
 
+---
 
 
 
