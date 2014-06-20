@@ -15015,6 +15015,10 @@ confusionMatrix(pred32_train, training_mod3$classe)
 
 ---
 
+## Final prediction on test set
+
+B A B A A E D B A A B C B A E E A B B B
+
 
 
 
