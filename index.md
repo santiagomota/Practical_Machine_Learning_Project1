@@ -14688,6 +14688,328 @@ testing_mod3$classe         <- testing$classe
 
 ---
 
+## Random Forest
+
+```r
+model30 <- train(classe ~., method="rf", data=training_mod3, 
+                 trControl=trainControl(method="cv"), number=3)
+```
+
+```
+## Loading required package: randomForest
+## randomForest 4.6-7
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+```r
+pred30_train <- predict(model30, training_mod3)
+table(pred30_train, training_mod3$classe)
+```
+
+```
+##             
+## pred30_train    A    B    C    D    E
+##            A 5580    0    0    0    0
+##            B    0 3797    0    0    0
+##            C    0    0 3422    0    0
+##            D    0    0    0 3216    0
+##            E    0    0    0    0 3607
+```
+
+---
+
+## Random Forest
+
+```r
+pred30 <- predict(model30, testing_mod3)
+print(model30)
+```
+
+```
+## Random Forest 
+## 
+## 19622 samples
+##    39 predictors
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## 
+## Summary of sample sizes: 17660, 17661, 17660, 17660, 17659, 17660, ... 
+## 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy  Kappa  Accuracy SD  Kappa SD
+##   2     1         1      0.004        0.005   
+##   30    1         1      0.002        0.003   
+##   60    1         1      0.002        0.003   
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 29.
+```
+
+---
+
+## Random Forest
+
+```r
+pred30
+```
+
+```
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+```
+
+```r
+confusionMatrix(pred30_train, training_mod3$classe)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 5580    0    0    0    0
+##          B    0 3797    0    0    0
+##          C    0    0 3422    0    0
+##          D    0    0    0 3216    0
+##          E    0    0    0    0 3607
+## 
+## Overall Statistics
+##                                 
+##                Accuracy : 1     
+##                  95% CI : (1, 1)
+##     No Information Rate : 0.284 
+##     P-Value [Acc > NIR] : <2e-16
+##                                 
+##                   Kappa : 1     
+##  Mcnemar's Test P-Value : NA    
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             1.000    1.000    1.000    1.000    1.000
+## Specificity             1.000    1.000    1.000    1.000    1.000
+## Pos Pred Value          1.000    1.000    1.000    1.000    1.000
+## Neg Pred Value          1.000    1.000    1.000    1.000    1.000
+## Prevalence              0.284    0.194    0.174    0.164    0.184
+## Detection Rate          0.284    0.194    0.174    0.164    0.184
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000
+```
+
+---
+
+## Bagging
+
+```r
+library(ipred)
+model31 <- bagging(classe ~., data=training_mod3, nbagg=25)
+pred31_train <- predict(model31, training_mod3)
+table(pred31_train, training_mod3$classe)
+```
+
+```
+##             
+## pred31_train    A    B    C    D    E
+##            A 5580    0    0    0    0
+##            B    0 3796    0    0    0
+##            C    0    1 3422    0    0
+##            D    0    0    0 3215    0
+##            E    0    0    0    1 3607
+```
+
+---
+
+## Bagging
+
+```r
+pred31 <- predict(model31, testing_mod3)
+print(model31)
+```
+
+```
+## 
+## Bagging classification trees with 25 bootstrap replications 
+## 
+## Call: bagging.data.frame(formula = classe ~ ., data = training_mod3, 
+##     nbagg = 25)
+```
+
+---
+
+## Bagging
+
+```r
+pred31
+```
+
+```
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+```
+
+```r
+confusionMatrix(pred31_train, training_mod3$classe)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 5580    0    0    0    0
+##          B    0 3796    0    0    0
+##          C    0    1 3422    0    0
+##          D    0    0    0 3215    0
+##          E    0    0    0    1 3607
+## 
+## Overall Statistics
+##                                 
+##                Accuracy : 1     
+##                  95% CI : (1, 1)
+##     No Information Rate : 0.284 
+##     P-Value [Acc > NIR] : <2e-16
+##                                 
+##                   Kappa : 1     
+##  Mcnemar's Test P-Value : NA    
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             1.000    1.000    1.000    1.000    1.000
+## Specificity             1.000    1.000    1.000    1.000    1.000
+## Pos Pred Value          1.000    1.000    1.000    1.000    1.000
+## Neg Pred Value          1.000    1.000    1.000    1.000    1.000
+## Prevalence              0.284    0.194    0.174    0.164    0.184
+## Detection Rate          0.284    0.193    0.174    0.164    0.184
+## Detection Prevalence    0.284    0.193    0.174    0.164    0.184
+## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000
+```
+
+---
+
+## C5.0
+
+```r
+model32 <- train(classe ~., method = "C5.0", data=training_mod3)
+```
+
+```
+## Loading required package: C50
+## Loading required package: plyr
+```
+
+```r
+pred32_train <- predict(model32, training_mod3)
+table(pred32_train, training_mod3$classe)
+```
+
+```
+##             
+## pred32_train    A    B    C    D    E
+##            A 5580    0    0    0    0
+##            B    0 3797    0    0    0
+##            C    0    0 3422    0    0
+##            D    0    0    0 3216    0
+##            E    0    0    0    0 3607
+```
+
+---
+
+## C5.0
+
+```r
+pred32 <- predict(model32, testing_mod3)
+print(model32)
+```
+
+```
+## C5.0 
+## 
+## 19622 samples
+##    39 predictors
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## 
+## Summary of sample sizes: 19622, 19622, 19622, 19622, 19622, 19622, ... 
+## 
+## Resampling results across tuning parameters:
+## 
+##   model  winnow  trials  Accuracy  Kappa  Accuracy SD  Kappa SD
+##   rules  FALSE   1       1         1      0.003        0.004   
+##   rules  FALSE   10      1         1      0.001        0.002   
+##   rules  FALSE   20      1         1      0.001        0.002   
+##   rules  TRUE    1       1         1      0.003        0.004   
+##   rules  TRUE    10      1         1      0.001        0.002   
+##   rules  TRUE    20      1         1      0.001        0.002   
+##   tree   FALSE   1       1         1      0.003        0.004   
+##   tree   FALSE   10      1         1      0.002        0.002   
+##   tree   FALSE   20      1         1      0.001        0.002   
+##   tree   TRUE    1       1         1      0.003        0.004   
+##   tree   TRUE    10      1         1      0.002        0.002   
+##   tree   TRUE    20      1         1      0.001        0.002   
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final values used for the model were trials = 20, model = rules
+##  and winnow = TRUE.
+```
+
+---
+
+## C5.0
+
+```r
+pred32
+```
+
+```
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+```
+
+```r
+confusionMatrix(pred32_train, training_mod3$classe)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 5580    0    0    0    0
+##          B    0 3797    0    0    0
+##          C    0    0 3422    0    0
+##          D    0    0    0 3216    0
+##          E    0    0    0    0 3607
+## 
+## Overall Statistics
+##                                 
+##                Accuracy : 1     
+##                  95% CI : (1, 1)
+##     No Information Rate : 0.284 
+##     P-Value [Acc > NIR] : <2e-16
+##                                 
+##                   Kappa : 1     
+##  Mcnemar's Test P-Value : NA    
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             1.000    1.000    1.000    1.000    1.000
+## Specificity             1.000    1.000    1.000    1.000    1.000
+## Pos Pred Value          1.000    1.000    1.000    1.000    1.000
+## Neg Pred Value          1.000    1.000    1.000    1.000    1.000
+## Prevalence              0.284    0.194    0.174    0.164    0.184
+## Detection Rate          0.284    0.194    0.174    0.164    0.184
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000
+```
+
+---
 
 
 
