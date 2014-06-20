@@ -103,6 +103,351 @@ featurePlot(x=training[,c("user_name","new_window","num_window", "X")],
 
 ---  
 
+## Print class of all variables in dataset
+```{r}
+sapply(training[1,], class)
+classes1 <- sapply(training[1,], class)
+table(classes1)
+classes2 <- sapply(testing[1,], class)
+table(classes2)
+```
+
+---
+
+## Change some classes
+```{r}
+training$classe         <- as.factor(training$classe)
+training$user_name      <- as.factor(training$user_name)
+training$new_window     <- factor(training$new_window, labels=c("no", "yes"), 
+                                  levels=c("no", "yes"))
+testing$user_name      <- as.factor(testing$user_name)
+testing$new_window     <- factor(testing$new_window, labels=c("no", "yes"), 
+                                 levels=c("no", "yes"))
+```
+
+---
+
+## Change some classes
+```{r}
+classes1 <- sapply(training[1,], class)
+table(classes1)
+classes2 <- sapply(testing[1,], class)
+table(classes2)
+classes1[classes1=="character"]
+```
+
+---
+
+## Change some classes
+```{r}
+names(classes1[classes1=="character"])
+classes_character <- names(classes1[classes1=="character"])
+summary(training[, classes_character])
+for (i in 1:34) {
+  print(classes_character[i])
+  print(table(training[, classes_character[i]]))
+}
+```
+
+---
+
+## Change some classes
+```{r}
+for (i in 2:34) {
+  training[, classes_character[i]][training[, classes_character[i]]==""] <- NA
+  training[, classes_character[i]][training[, classes_character[i]]=="#DIV/0!"] <- Inf
+  training[, classes_character[i]] <- as.numeric(as.character(training[, classes_character[i]]))
+  print(classes_character[i])
+  print(table(training[, classes_character[i]]))
+  print(class(training[, classes_character[i]]))
+}
+sapply(training[, classes_character], as.numeric)
+classes1 <- sapply(training[1,], class)
+table(classes1)
+```
+
+---
+
+## Some information
+```{r}
+table(training$classe)
+table(training$user_name)
+table(training$new_window)
+table(training$classe, training$new_window)
+table(training$classe, training$num_window)
+
+```
+
+---
+
+## Some information
+```{r}
+plot(training$classe, training$num_window)
+```
+
+---
+
+## Some information
+```{r}
+table(training$min_yaw_forearm)
+table(training$max_yaw_forearm)
+table(training$cvtd_timestamp)
+table(training$new_window)
+```
+
+---
+
+## Change more classes
+```{r}
+summary(training)
+sapply(training[1,], class)
+classes2[classes2=="logical"]
+```
+
+---
+
+## Change more classes
+```{r}
+names(classes2[classes2=="logical"])
+classes2_logical <- names(classes2[classes2=="logical"])
+summary(testing[, classes2_logical])
+
+```
+
+---
+
+## Change more classes
+```{r}
+for (i in 1:100) {
+  print(classes2_logical[i])
+  print(table(testing[, classes2_logical[i]]))
+}
+
+for (i in 1:100) {
+  # testing[, classes2_logical[i]] <- as.numeric(as.character(testing[, classes2_logical[i]]))
+  testing[, classes2_logical[i]] <- as.numeric(testing[, classes2_logical[i]])
+  print(classes2_logical[i])
+  print(table(testing[, classes2_logical[i]]))
+  print(class(testing[, classes2_logical[i]]))
+}
+
+summary(testing)
+sapply(testing[1,], class)
+
+```
+
+---
+
+## Change more classes
+```{r}
+classes2 <- sapply(testing[1,], class)
+table(classes2)
+table(classes1)
+
+```
+
+---
+
+## Change more classes
+```{r}
+table(classes1, classes2)
+
+```
+
+---
+
+## Extract variables with values not NA in a new DF
+```{r}
+mean0 <- sapply(training, mean)
+training_mod <- training[, na.omit(names(mean0)[as.numeric(!(mean0=="NA"))==1])]
+testing_mod <-  testing[, names(training_mod)]
+```
+
+---
+
+## Include user_name and classe
+```{r}
+training_mod$user_name <- training$user_name
+testing_mod$user_name  <- testing$user_name
+training_mod$classe    <- training$classe
+```
+
+---
+
+## Complete DF with training and testing data
+We change classe variable to numeric
+Values of test set are classe = 6
+```{r}
+temp <- training
+temp$classe <- as.numeric(temp$classe)
+temp2 <- testing
+temp2$problem_id <- NULL
+temp2$classe <- 6
+all <- rbind(temp, temp2)
+```
+
+---
+
+## Delete temp DF
+```{r}
+rm(temp)
+rm(temp2)
+```
+
+---
+
+## One DF only with 4 columns 
+```{r}
+minimum <- all[, c(2, 5, 6, 160)]
+minimum$cvtd_timestamp <- as.POSIXct(strptime(minimum$cvtd_timestamp, "%d/%m/%Y %H:%M"))
+minimum <- minimum[order(minimum$user_name, minimum$cvtd_timestamp),]
+```
+
+---
+
+## Some plots to study data
+```{r}
+plot(minimum$cvtd_timestamp, minimum$classe, col=minimum$user_name, pch=19)
+```
+
+---
+
+## Some plots to study data
+```{r}
+qplot(cvtd_timestamp, classe, data=all, geom="jitter", colour=factor(user_name), 
+      main="Classe by time", ylab="Classe", xlab="Time")
+```
+
+---
+
+## Some plots to study data
+```{r}
+qplot(cvtd_timestamp, classe, data=all, geom="jitter", colour=factor(user_name), 
+      main="Classe by time", ylab="Classe", xlab="Time") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+---
+
+## Correlation
+Only numeric variables
+```{r}
+M_cor <- abs(cor(training[,-c(2, 5, 6, 160)]))
+M_cor
+diag(M_cor) <- 0
+which(M_cor>0.8, arr.ind=T)
+
+```
+
+---
+
+## variables with correlation > 0.8
+```{r}
+new_names <- row.names(which(M_cor>0.8, arr.ind=T))
+new_names
+```
+
+---
+
+## New DF with variables with cor > 0.8
+We also include timestamp and classe
+```{r}
+training_mod3 <- training[, new_names]
+training_mod3$cvtd_timestamp <- training$cvtd_timestamp
+training_mod3$classe         <- training$classe
+```
+
+---
+
+## Same for testing 
+```{r}
+testing_mod3 <- testing[, new_names]
+testing_mod3$cvtd_timestamp <- testing$cvtd_timestamp
+testing_mod3$classe         <- testing$classe
+```
+
+---
+
+## Random Forest
+```{r}
+model30 <- train(classe ~., method="rf", data=training_mod3, 
+                 trControl=trainControl(method="cv"), number=3)
+pred30_train <- predict(model30, training_mod3)
+table(pred30_train, training_mod3$classe)
+```
+
+---
+
+## Random Forest
+```{r}
+pred30 <- predict(model30, testing_mod3)
+print(model30)
+```
+
+---
+
+## Random Forest
+```{r}
+pred30
+confusionMatrix(pred30_train, training_mod3$classe)
+```
+
+---
+
+## Bagging
+```{r}
+library(ipred)
+model31 <- bagging(classe ~., data=training_mod3, nbagg=25)
+pred31_train <- predict(model31, training_mod3)
+table(pred31_train, training_mod3$classe)
+```
+
+---
+
+## Bagging
+```{r}
+pred31 <- predict(model31, testing_mod3)
+print(model31)
+```
+
+---
+
+## Bagging
+```{r}
+pred31
+confusionMatrix(pred31_train, training_mod3$classe)
+```
+
+---
+
+## C5.0
+```{r}
+model32 <- train(classe ~., method = "C5.0", data=training_mod3)
+pred32_train <- predict(model32, training_mod3)
+table(pred32_train, training_mod3$classe)
+```
+
+---
+
+## C5.0
+```{r}
+pred32 <- predict(model32, testing_mod3)
+print(model32)
+```
+
+---
+
+## C5.0
+```{r}
+pred32
+confusionMatrix(pred32_train, training_mod3$classe)
+```
+
+---
+
+
+
+
 
 
 

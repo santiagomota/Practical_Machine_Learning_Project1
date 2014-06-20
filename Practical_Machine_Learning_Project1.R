@@ -188,7 +188,7 @@ qplot(cvtd_timestamp, classe, data=all, geom="jitter", colour=factor(user_name),
 
 qplot(cvtd_timestamp, classe, data=all, geom="jitter", colour=factor(user_name), 
       main="Classe by time", ylab="Classe", xlab="Time") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 # Principal components analysis
 pca.out <- prcomp(training_mod[, -c(57, 58)], scale.=TRUE)
@@ -294,8 +294,6 @@ pml_write_files(answers)
 # please make sure the files that get written out have one character each with 
 # your prediction for the corresponding problem ID. I have noticed the script 
 # produces strange results if the answers variable is not a character vector. 
-
-
 
 ################################################################################
 # Change to main directory
