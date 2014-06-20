@@ -1,8 +1,8 @@
 ---
-title       : Practical_Machine_Learning_Project1
-subtitle    : 
+title       : Project1
+subtitle    : Practical Machine Learning
 author      : Santiago Mota
-job         : 
+job         : Coursera
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : tomorrow      # 
@@ -11,15 +11,564 @@ mode        : selfcontained # {standalone, draft}
 knit        : slidify::knit2slides
 ---
 
-## Read-And-Delete
+## Open data
 
-1. Edit YAML front matter
-2. Write using R Markdown
-3. Use an empty line followed by three dashes to separate slides!
 
---- .class #id 
+```r
+library(caret)
 
-## Slide 2
+# Create data directory
+if(!file.exists("./data")){dir.create("./data")}
+
+# Download train file
+urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+download.file(urls, "./data/pml-training.csv")
+
+# Download test file
+urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+download.file(urls, "./data/pml-testing.csv")
+```
+
+---
+
+## Open data
+
+```r
+# Change to data directory
+setwd("./data/")
+
+# Load datasets
+training <- read.csv("pml-training.csv", header=TRUE, sep=",",
+                     stringsAsFactors=FALSE)
+testing  <- read.csv("pml-testing.csv", header=TRUE, sep=",",
+                     stringsAsFactors=FALSE)
+```
+
+---
+
+## Some analysis
+
+```r
+str(training)
+```
+
+```
+## 'data.frame':	19622 obs. of  160 variables:
+##  $ X                       : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ user_name               : chr  "carlitos" "carlitos" "carlitos" "carlitos" ...
+##  $ raw_timestamp_part_1    : int  1323084231 1323084231 1323084231 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 ...
+##  $ raw_timestamp_part_2    : int  788290 808298 820366 120339 196328 304277 368296 440390 484323 484434 ...
+##  $ cvtd_timestamp          : chr  "05/12/2011 11:23" "05/12/2011 11:23" "05/12/2011 11:23" "05/12/2011 11:23" ...
+##  $ new_window              : chr  "no" "no" "no" "no" ...
+##  $ num_window              : int  11 11 11 12 12 12 12 12 12 12 ...
+##  $ roll_belt               : num  1.41 1.41 1.42 1.48 1.48 1.45 1.42 1.42 1.43 1.45 ...
+##  $ pitch_belt              : num  8.07 8.07 8.07 8.05 8.07 8.06 8.09 8.13 8.16 8.17 ...
+##  $ yaw_belt                : num  -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 ...
+##  $ total_accel_belt        : int  3 3 3 3 3 3 3 3 3 3 ...
+##  $ kurtosis_roll_belt      : chr  "" "" "" "" ...
+##  $ kurtosis_picth_belt     : chr  "" "" "" "" ...
+##  $ kurtosis_yaw_belt       : chr  "" "" "" "" ...
+##  $ skewness_roll_belt      : chr  "" "" "" "" ...
+##  $ skewness_roll_belt.1    : chr  "" "" "" "" ...
+##  $ skewness_yaw_belt       : chr  "" "" "" "" ...
+##  $ max_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_belt            : chr  "" "" "" "" ...
+##  $ min_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_belt            : chr  "" "" "" "" ...
+##  $ amplitude_roll_belt     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_belt    : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_belt      : chr  "" "" "" "" ...
+##  $ var_total_accel_belt    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_belt        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_belt       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_belt         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_belt_x            : num  0 0.02 0 0.02 0.02 0.02 0.02 0.02 0.02 0.03 ...
+##  $ gyros_belt_y            : num  0 0 0 0 0.02 0 0 0 0 0 ...
+##  $ gyros_belt_z            : num  -0.02 -0.02 -0.02 -0.03 -0.02 -0.02 -0.02 -0.02 -0.02 0 ...
+##  $ accel_belt_x            : int  -21 -22 -20 -22 -21 -21 -22 -22 -20 -21 ...
+##  $ accel_belt_y            : int  4 4 5 3 2 4 3 4 2 4 ...
+##  $ accel_belt_z            : int  22 22 23 21 24 21 21 21 24 22 ...
+##  $ magnet_belt_x           : int  -3 -7 -2 -6 -6 0 -4 -2 1 -3 ...
+##  $ magnet_belt_y           : int  599 608 600 604 600 603 599 603 602 609 ...
+##  $ magnet_belt_z           : int  -313 -311 -305 -310 -302 -312 -311 -313 -312 -308 ...
+##  $ roll_arm                : num  -128 -128 -128 -128 -128 -128 -128 -128 -128 -128 ...
+##  $ pitch_arm               : num  22.5 22.5 22.5 22.1 22.1 22 21.9 21.8 21.7 21.6 ...
+##  $ yaw_arm                 : num  -161 -161 -161 -161 -161 -161 -161 -161 -161 -161 ...
+##  $ total_accel_arm         : int  34 34 34 34 34 34 34 34 34 34 ...
+##  $ var_accel_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_arm         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_arm          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_arm_x             : num  0 0.02 0.02 0.02 0 0.02 0 0.02 0.02 0.02 ...
+##  $ gyros_arm_y             : num  0 -0.02 -0.02 -0.03 -0.03 -0.03 -0.03 -0.02 -0.03 -0.03 ...
+##  $ gyros_arm_z             : num  -0.02 -0.02 -0.02 0.02 0 0 0 0 -0.02 -0.02 ...
+##  $ accel_arm_x             : int  -288 -290 -289 -289 -289 -289 -289 -289 -288 -288 ...
+##  $ accel_arm_y             : int  109 110 110 111 111 111 111 111 109 110 ...
+##  $ accel_arm_z             : int  -123 -125 -126 -123 -123 -122 -125 -124 -122 -124 ...
+##  $ magnet_arm_x            : int  -368 -369 -368 -372 -374 -369 -373 -372 -369 -376 ...
+##  $ magnet_arm_y            : int  337 337 344 344 337 342 336 338 341 334 ...
+##  $ magnet_arm_z            : int  516 513 513 512 506 513 509 510 518 516 ...
+##  $ kurtosis_roll_arm       : chr  "" "" "" "" ...
+##  $ kurtosis_picth_arm      : chr  "" "" "" "" ...
+##  $ kurtosis_yaw_arm        : chr  "" "" "" "" ...
+##  $ skewness_roll_arm       : chr  "" "" "" "" ...
+##  $ skewness_pitch_arm      : chr  "" "" "" "" ...
+##  $ skewness_yaw_arm        : chr  "" "" "" "" ...
+##  $ max_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_arm     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_arm       : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ roll_dumbbell           : num  13.1 13.1 12.9 13.4 13.4 ...
+##  $ pitch_dumbbell          : num  -70.5 -70.6 -70.3 -70.4 -70.4 ...
+##  $ yaw_dumbbell            : num  -84.9 -84.7 -85.1 -84.9 -84.9 ...
+##  $ kurtosis_roll_dumbbell  : chr  "" "" "" "" ...
+##  $ kurtosis_picth_dumbbell : chr  "" "" "" "" ...
+##  $ kurtosis_yaw_dumbbell   : chr  "" "" "" "" ...
+##  $ skewness_roll_dumbbell  : chr  "" "" "" "" ...
+##  $ skewness_pitch_dumbbell : chr  "" "" "" "" ...
+##  $ skewness_yaw_dumbbell   : chr  "" "" "" "" ...
+##  $ max_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_dumbbell        : chr  "" "" "" "" ...
+##  $ min_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_dumbbell        : chr  "" "" "" "" ...
+##  $ amplitude_roll_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##   [list output truncated]
+```
+
+---
+
+## Some analysis
+
+```r
+summary(training)
+```
+
+```
+##        X          user_name         raw_timestamp_part_1
+##  Min.   :    1   Length:19622       Min.   :1.32e+09    
+##  1st Qu.: 4906   Class :character   1st Qu.:1.32e+09    
+##  Median : 9812   Mode  :character   Median :1.32e+09    
+##  Mean   : 9812                      Mean   :1.32e+09    
+##  3rd Qu.:14717                      3rd Qu.:1.32e+09    
+##  Max.   :19622                      Max.   :1.32e+09    
+##                                                         
+##  raw_timestamp_part_2 cvtd_timestamp      new_window          num_window 
+##  Min.   :   294       Length:19622       Length:19622       Min.   :  1  
+##  1st Qu.:252912       Class :character   Class :character   1st Qu.:222  
+##  Median :496380       Mode  :character   Mode  :character   Median :424  
+##  Mean   :500656                                             Mean   :431  
+##  3rd Qu.:751891                                             3rd Qu.:644  
+##  Max.   :998801                                             Max.   :864  
+##                                                                          
+##    roll_belt       pitch_belt        yaw_belt      total_accel_belt
+##  Min.   :-28.9   Min.   :-55.80   Min.   :-180.0   Min.   : 0.0    
+##  1st Qu.:  1.1   1st Qu.:  1.76   1st Qu.: -88.3   1st Qu.: 3.0    
+##  Median :113.0   Median :  5.28   Median : -13.0   Median :17.0    
+##  Mean   : 64.4   Mean   :  0.31   Mean   : -11.2   Mean   :11.3    
+##  3rd Qu.:123.0   3rd Qu.: 14.90   3rd Qu.:  12.9   3rd Qu.:18.0    
+##  Max.   :162.0   Max.   : 60.30   Max.   : 179.0   Max.   :29.0    
+##                                                                    
+##  kurtosis_roll_belt kurtosis_picth_belt kurtosis_yaw_belt 
+##  Length:19622       Length:19622        Length:19622      
+##  Class :character   Class :character    Class :character  
+##  Mode  :character   Mode  :character    Mode  :character  
+##                                                           
+##                                                           
+##                                                           
+##                                                           
+##  skewness_roll_belt skewness_roll_belt.1 skewness_yaw_belt 
+##  Length:19622       Length:19622         Length:19622      
+##  Class :character   Class :character     Class :character  
+##  Mode  :character   Mode  :character     Mode  :character  
+##                                                            
+##                                                            
+##                                                            
+##                                                            
+##  max_roll_belt   max_picth_belt  max_yaw_belt       min_roll_belt  
+##  Min.   :-94     Min.   : 3      Length:19622       Min.   :-180   
+##  1st Qu.:-88     1st Qu.: 5      Class :character   1st Qu.: -88   
+##  Median : -5     Median :18      Mode  :character   Median :  -8   
+##  Mean   : -7     Mean   :13                         Mean   : -10   
+##  3rd Qu.: 18     3rd Qu.:19                         3rd Qu.:   9   
+##  Max.   :180     Max.   :30                         Max.   : 173   
+##  NA's   :19216   NA's   :19216                      NA's   :19216  
+##  min_pitch_belt  min_yaw_belt       amplitude_roll_belt
+##  Min.   : 0      Length:19622       Min.   :  0        
+##  1st Qu.: 3      Class :character   1st Qu.:  0        
+##  Median :16      Mode  :character   Median :  1        
+##  Mean   :11                         Mean   :  4        
+##  3rd Qu.:17                         3rd Qu.:  2        
+##  Max.   :23                         Max.   :360        
+##  NA's   :19216                      NA's   :19216      
+##  amplitude_pitch_belt amplitude_yaw_belt var_total_accel_belt
+##  Min.   : 0           Length:19622       Min.   : 0          
+##  1st Qu.: 1           Class :character   1st Qu.: 0          
+##  Median : 1           Mode  :character   Median : 0          
+##  Mean   : 2                              Mean   : 1          
+##  3rd Qu.: 2                              3rd Qu.: 0          
+##  Max.   :12                              Max.   :16          
+##  NA's   :19216                           NA's   :19216       
+##  avg_roll_belt   stddev_roll_belt var_roll_belt   avg_pitch_belt 
+##  Min.   :-27     Min.   : 0       Min.   :  0     Min.   :-51    
+##  1st Qu.:  1     1st Qu.: 0       1st Qu.:  0     1st Qu.:  2    
+##  Median :116     Median : 0       Median :  0     Median :  5    
+##  Mean   : 68     Mean   : 1       Mean   :  8     Mean   :  1    
+##  3rd Qu.:123     3rd Qu.: 1       3rd Qu.:  0     3rd Qu.: 16    
+##  Max.   :157     Max.   :14       Max.   :201     Max.   : 60    
+##  NA's   :19216   NA's   :19216    NA's   :19216   NA's   :19216  
+##  stddev_pitch_belt var_pitch_belt   avg_yaw_belt   stddev_yaw_belt
+##  Min.   :0         Min.   : 0      Min.   :-138    Min.   :  0    
+##  1st Qu.:0         1st Qu.: 0      1st Qu.: -88    1st Qu.:  0    
+##  Median :0         Median : 0      Median :  -7    Median :  0    
+##  Mean   :1         Mean   : 1      Mean   :  -9    Mean   :  1    
+##  3rd Qu.:1         3rd Qu.: 0      3rd Qu.:  14    3rd Qu.:  1    
+##  Max.   :4         Max.   :16      Max.   : 174    Max.   :177    
+##  NA's   :19216     NA's   :19216   NA's   :19216   NA's   :19216  
+##   var_yaw_belt    gyros_belt_x      gyros_belt_y      gyros_belt_z   
+##  Min.   :    0   Min.   :-1.0400   Min.   :-0.6400   Min.   :-1.460  
+##  1st Qu.:    0   1st Qu.:-0.0300   1st Qu.: 0.0000   1st Qu.:-0.200  
+##  Median :    0   Median : 0.0300   Median : 0.0200   Median :-0.100  
+##  Mean   :  107   Mean   :-0.0056   Mean   : 0.0396   Mean   :-0.130  
+##  3rd Qu.:    0   3rd Qu.: 0.1100   3rd Qu.: 0.1100   3rd Qu.:-0.020  
+##  Max.   :31183   Max.   : 2.2200   Max.   : 0.6400   Max.   : 1.620  
+##  NA's   :19216                                                       
+##   accel_belt_x      accel_belt_y    accel_belt_z    magnet_belt_x  
+##  Min.   :-120.00   Min.   :-69.0   Min.   :-275.0   Min.   :-52.0  
+##  1st Qu.: -21.00   1st Qu.:  3.0   1st Qu.:-162.0   1st Qu.:  9.0  
+##  Median : -15.00   Median : 35.0   Median :-152.0   Median : 35.0  
+##  Mean   :  -5.59   Mean   : 30.1   Mean   : -72.6   Mean   : 55.6  
+##  3rd Qu.:  -5.00   3rd Qu.: 61.0   3rd Qu.:  27.0   3rd Qu.: 59.0  
+##  Max.   :  85.00   Max.   :164.0   Max.   : 105.0   Max.   :485.0  
+##                                                                    
+##  magnet_belt_y magnet_belt_z     roll_arm        pitch_arm     
+##  Min.   :354   Min.   :-623   Min.   :-180.0   Min.   :-88.80  
+##  1st Qu.:581   1st Qu.:-375   1st Qu.: -31.8   1st Qu.:-25.90  
+##  Median :601   Median :-320   Median :   0.0   Median :  0.00  
+##  Mean   :594   Mean   :-346   Mean   :  17.8   Mean   : -4.61  
+##  3rd Qu.:610   3rd Qu.:-306   3rd Qu.:  77.3   3rd Qu.: 11.20  
+##  Max.   :673   Max.   : 293   Max.   : 180.0   Max.   : 88.50  
+##                                                                
+##     yaw_arm        total_accel_arm var_accel_arm    avg_roll_arm  
+##  Min.   :-180.00   Min.   : 1.0    Min.   :  0     Min.   :-167   
+##  1st Qu.: -43.10   1st Qu.:17.0    1st Qu.:  9     1st Qu.: -38   
+##  Median :   0.00   Median :27.0    Median : 41     Median :   0   
+##  Mean   :  -0.62   Mean   :25.5    Mean   : 53     Mean   :  13   
+##  3rd Qu.:  45.88   3rd Qu.:33.0    3rd Qu.: 76     3rd Qu.:  76   
+##  Max.   : 180.00   Max.   :66.0    Max.   :332     Max.   : 163   
+##                                    NA's   :19216   NA's   :19216  
+##  stddev_roll_arm  var_roll_arm   avg_pitch_arm   stddev_pitch_arm
+##  Min.   :  0     Min.   :    0   Min.   :-82     Min.   : 0      
+##  1st Qu.:  1     1st Qu.:    2   1st Qu.:-23     1st Qu.: 2      
+##  Median :  6     Median :   33   Median :  0     Median : 8      
+##  Mean   : 11     Mean   :  417   Mean   : -5     Mean   :10      
+##  3rd Qu.: 15     3rd Qu.:  223   3rd Qu.:  8     3rd Qu.:16      
+##  Max.   :162     Max.   :26232   Max.   : 76     Max.   :43      
+##  NA's   :19216   NA's   :19216   NA's   :19216   NA's   :19216   
+##  var_pitch_arm    avg_yaw_arm    stddev_yaw_arm   var_yaw_arm   
+##  Min.   :   0    Min.   :-173    Min.   :  0     Min.   :    0  
+##  1st Qu.:   3    1st Qu.: -29    1st Qu.:  3     1st Qu.:    7  
+##  Median :  66    Median :   0    Median : 17     Median :  278  
+##  Mean   : 196    Mean   :   2    Mean   : 22     Mean   : 1056  
+##  3rd Qu.: 267    3rd Qu.:  38    3rd Qu.: 36     3rd Qu.: 1295  
+##  Max.   :1885    Max.   : 152    Max.   :177     Max.   :31345  
+##  NA's   :19216   NA's   :19216   NA's   :19216   NA's   :19216  
+##   gyros_arm_x      gyros_arm_y      gyros_arm_z     accel_arm_x    
+##  Min.   :-6.370   Min.   :-3.440   Min.   :-2.33   Min.   :-404.0  
+##  1st Qu.:-1.330   1st Qu.:-0.800   1st Qu.:-0.07   1st Qu.:-242.0  
+##  Median : 0.080   Median :-0.240   Median : 0.23   Median : -44.0  
+##  Mean   : 0.043   Mean   :-0.257   Mean   : 0.27   Mean   : -60.2  
+##  3rd Qu.: 1.570   3rd Qu.: 0.140   3rd Qu.: 0.72   3rd Qu.:  84.0  
+##  Max.   : 4.870   Max.   : 2.840   Max.   : 3.02   Max.   : 437.0  
+##                                                                    
+##   accel_arm_y      accel_arm_z      magnet_arm_x   magnet_arm_y 
+##  Min.   :-318.0   Min.   :-636.0   Min.   :-584   Min.   :-392  
+##  1st Qu.: -54.0   1st Qu.:-143.0   1st Qu.:-300   1st Qu.:  -9  
+##  Median :  14.0   Median : -47.0   Median : 289   Median : 202  
+##  Mean   :  32.6   Mean   : -71.2   Mean   : 192   Mean   : 157  
+##  3rd Qu.: 139.0   3rd Qu.:  23.0   3rd Qu.: 637   3rd Qu.: 323  
+##  Max.   : 308.0   Max.   : 292.0   Max.   : 782   Max.   : 583  
+##                                                                 
+##   magnet_arm_z  kurtosis_roll_arm  kurtosis_picth_arm kurtosis_yaw_arm  
+##  Min.   :-597   Length:19622       Length:19622       Length:19622      
+##  1st Qu.: 131   Class :character   Class :character   Class :character  
+##  Median : 444   Mode  :character   Mode  :character   Mode  :character  
+##  Mean   : 306                                                           
+##  3rd Qu.: 545                                                           
+##  Max.   : 694                                                           
+##                                                                         
+##  skewness_roll_arm  skewness_pitch_arm skewness_yaw_arm    max_roll_arm  
+##  Length:19622       Length:19622       Length:19622       Min.   :-73    
+##  Class :character   Class :character   Class :character   1st Qu.:  0    
+##  Mode  :character   Mode  :character   Mode  :character   Median :  5    
+##                                                           Mean   : 11    
+##                                                           3rd Qu.: 27    
+##                                                           Max.   : 86    
+##                                                           NA's   :19216  
+##  max_picth_arm    max_yaw_arm     min_roll_arm   min_pitch_arm  
+##  Min.   :-173    Min.   : 4      Min.   :-89     Min.   :-180   
+##  1st Qu.:  -2    1st Qu.:29      1st Qu.:-42     1st Qu.: -73   
+##  Median :  23    Median :34      Median :-22     Median : -34   
+##  Mean   :  36    Mean   :35      Mean   :-21     Mean   : -34   
+##  3rd Qu.:  96    3rd Qu.:41      3rd Qu.:  0     3rd Qu.:   0   
+##  Max.   : 180    Max.   :65      Max.   : 66     Max.   : 152   
+##  NA's   :19216   NA's   :19216   NA's   :19216   NA's   :19216  
+##   min_yaw_arm    amplitude_roll_arm amplitude_pitch_arm amplitude_yaw_arm
+##  Min.   : 1      Min.   :  0        Min.   :  0         Min.   : 0       
+##  1st Qu.: 8      1st Qu.:  5        1st Qu.: 10         1st Qu.:13       
+##  Median :13      Median : 28        Median : 55         Median :22       
+##  Mean   :15      Mean   : 32        Mean   : 70         Mean   :21       
+##  3rd Qu.:19      3rd Qu.: 51        3rd Qu.:115         3rd Qu.:29       
+##  Max.   :38      Max.   :120        Max.   :360         Max.   :52       
+##  NA's   :19216   NA's   :19216      NA's   :19216       NA's   :19216    
+##  roll_dumbbell    pitch_dumbbell    yaw_dumbbell    
+##  Min.   :-153.7   Min.   :-149.6   Min.   :-150.87  
+##  1st Qu.: -18.5   1st Qu.: -40.9   1st Qu.: -77.64  
+##  Median :  48.2   Median : -21.0   Median :  -3.32  
+##  Mean   :  23.8   Mean   : -10.8   Mean   :   1.67  
+##  3rd Qu.:  67.6   3rd Qu.:  17.5   3rd Qu.:  79.64  
+##  Max.   : 153.6   Max.   : 149.4   Max.   : 154.95  
+##                                                     
+##  kurtosis_roll_dumbbell kurtosis_picth_dumbbell kurtosis_yaw_dumbbell
+##  Length:19622           Length:19622            Length:19622         
+##  Class :character       Class :character        Class :character     
+##  Mode  :character       Mode  :character        Mode  :character     
+##                                                                      
+##                                                                      
+##                                                                      
+##                                                                      
+##  skewness_roll_dumbbell skewness_pitch_dumbbell skewness_yaw_dumbbell
+##  Length:19622           Length:19622            Length:19622         
+##  Class :character       Class :character        Class :character     
+##  Mode  :character       Mode  :character        Mode  :character     
+##                                                                      
+##                                                                      
+##                                                                      
+##                                                                      
+##  max_roll_dumbbell max_picth_dumbbell max_yaw_dumbbell   min_roll_dumbbell
+##  Min.   :-70       Min.   :-113       Length:19622       Min.   :-150     
+##  1st Qu.:-27       1st Qu.: -67       Class :character   1st Qu.: -60     
+##  Median : 15       Median :  40       Mode  :character   Median : -44     
+##  Mean   : 14       Mean   :  33                          Mean   : -41     
+##  3rd Qu.: 51       3rd Qu.: 133                          3rd Qu.: -25     
+##  Max.   :137       Max.   : 155                          Max.   :  73     
+##  NA's   :19216     NA's   :19216                         NA's   :19216    
+##  min_pitch_dumbbell min_yaw_dumbbell   amplitude_roll_dumbbell
+##  Min.   :-147       Length:19622       Min.   :  0            
+##  1st Qu.: -92       Class :character   1st Qu.: 15            
+##  Median : -66       Mode  :character   Median : 35            
+##  Mean   : -33                          Mean   : 55            
+##  3rd Qu.:  21                          3rd Qu.: 81            
+##  Max.   : 121                          Max.   :256            
+##  NA's   :19216                         NA's   :19216          
+##  amplitude_pitch_dumbbell amplitude_yaw_dumbbell total_accel_dumbbell
+##  Min.   :  0              Length:19622           Min.   : 0.0        
+##  1st Qu.: 17              Class :character       1st Qu.: 4.0        
+##  Median : 42              Mode  :character       Median :10.0        
+##  Mean   : 66                                     Mean   :13.7        
+##  3rd Qu.:100                                     3rd Qu.:19.0        
+##  Max.   :274                                     Max.   :58.0        
+##  NA's   :19216                                                       
+##  var_accel_dumbbell avg_roll_dumbbell stddev_roll_dumbbell
+##  Min.   :  0        Min.   :-129      Min.   :  0         
+##  1st Qu.:  0        1st Qu.: -12      1st Qu.:  5         
+##  Median :  1        Median :  48      Median : 12         
+##  Mean   :  4        Mean   :  24      Mean   : 21         
+##  3rd Qu.:  3        3rd Qu.:  64      3rd Qu.: 26         
+##  Max.   :230        Max.   : 126      Max.   :124         
+##  NA's   :19216      NA's   :19216     NA's   :19216       
+##  var_roll_dumbbell avg_pitch_dumbbell stddev_pitch_dumbbell
+##  Min.   :    0     Min.   :-71        Min.   : 0           
+##  1st Qu.:   22     1st Qu.:-42        1st Qu.: 3           
+##  Median :  149     Median :-20        Median : 8           
+##  Mean   : 1020     Mean   :-12        Mean   :13           
+##  3rd Qu.:  695     3rd Qu.: 13        3rd Qu.:19           
+##  Max.   :15321     Max.   : 94        Max.   :83           
+##  NA's   :19216     NA's   :19216      NA's   :19216        
+##  var_pitch_dumbbell avg_yaw_dumbbell stddev_yaw_dumbbell var_yaw_dumbbell
+##  Min.   :   0       Min.   :-118     Min.   :  0         Min.   :    0   
+##  1st Qu.:  12       1st Qu.: -77     1st Qu.:  4         1st Qu.:   15   
+##  Median :  65       Median :  -5     Median : 10         Median :  105   
+##  Mean   : 350       Mean   :   0     Mean   : 17         Mean   :  590   
+##  3rd Qu.: 370       3rd Qu.:  71     3rd Qu.: 25         3rd Qu.:  609   
+##  Max.   :6836       Max.   : 135     Max.   :107         Max.   :11468   
+##  NA's   :19216      NA's   :19216    NA's   :19216       NA's   :19216   
+##  gyros_dumbbell_x  gyros_dumbbell_y gyros_dumbbell_z accel_dumbbell_x
+##  Min.   :-204.00   Min.   :-2.10    Min.   : -2.4    Min.   :-419.0  
+##  1st Qu.:  -0.03   1st Qu.:-0.14    1st Qu.: -0.3    1st Qu.: -50.0  
+##  Median :   0.13   Median : 0.03    Median : -0.1    Median :  -8.0  
+##  Mean   :   0.16   Mean   : 0.05    Mean   : -0.1    Mean   : -28.6  
+##  3rd Qu.:   0.35   3rd Qu.: 0.21    3rd Qu.:  0.0    3rd Qu.:  11.0  
+##  Max.   :   2.22   Max.   :52.00    Max.   :317.0    Max.   : 235.0  
+##                                                                      
+##  accel_dumbbell_y accel_dumbbell_z magnet_dumbbell_x magnet_dumbbell_y
+##  Min.   :-189.0   Min.   :-334.0   Min.   :-643      Min.   :-3600    
+##  1st Qu.:  -8.0   1st Qu.:-142.0   1st Qu.:-535      1st Qu.:  231    
+##  Median :  41.5   Median :  -1.0   Median :-479      Median :  311    
+##  Mean   :  52.6   Mean   : -38.3   Mean   :-328      Mean   :  221    
+##  3rd Qu.: 111.0   3rd Qu.:  38.0   3rd Qu.:-304      3rd Qu.:  390    
+##  Max.   : 315.0   Max.   : 318.0   Max.   : 592      Max.   :  633    
+##                                                                       
+##  magnet_dumbbell_z  roll_forearm     pitch_forearm     yaw_forearm    
+##  Min.   :-262.0    Min.   :-180.00   Min.   :-72.50   Min.   :-180.0  
+##  1st Qu.: -45.0    1st Qu.:  -0.74   1st Qu.:  0.00   1st Qu.: -68.6  
+##  Median :  13.0    Median :  21.70   Median :  9.24   Median :   0.0  
+##  Mean   :  46.1    Mean   :  33.83   Mean   : 10.71   Mean   :  19.2  
+##  3rd Qu.:  95.0    3rd Qu.: 140.00   3rd Qu.: 28.40   3rd Qu.: 110.0  
+##  Max.   : 452.0    Max.   : 180.00   Max.   : 89.80   Max.   : 180.0  
+##                                                                       
+##  kurtosis_roll_forearm kurtosis_picth_forearm kurtosis_yaw_forearm
+##  Length:19622          Length:19622           Length:19622        
+##  Class :character      Class :character       Class :character    
+##  Mode  :character      Mode  :character       Mode  :character    
+##                                                                   
+##                                                                   
+##                                                                   
+##                                                                   
+##  skewness_roll_forearm skewness_pitch_forearm skewness_yaw_forearm
+##  Length:19622          Length:19622           Length:19622        
+##  Class :character      Class :character       Class :character    
+##  Mode  :character      Mode  :character       Mode  :character    
+##                                                                   
+##                                                                   
+##                                                                   
+##                                                                   
+##  max_roll_forearm max_picth_forearm max_yaw_forearm    min_roll_forearm
+##  Min.   :-67      Min.   :-151      Length:19622       Min.   :-72     
+##  1st Qu.:  0      1st Qu.:   0      Class :character   1st Qu.: -6     
+##  Median : 27      Median : 113      Mode  :character   Median :  0     
+##  Mean   : 24      Mean   :  81                         Mean   :  0     
+##  3rd Qu.: 46      3rd Qu.: 175                         3rd Qu.: 12     
+##  Max.   : 90      Max.   : 180                         Max.   : 62     
+##  NA's   :19216    NA's   :19216                        NA's   :19216   
+##  min_pitch_forearm min_yaw_forearm    amplitude_roll_forearm
+##  Min.   :-180      Length:19622       Min.   :  0           
+##  1st Qu.:-175      Class :character   1st Qu.:  1           
+##  Median : -61      Mode  :character   Median : 18           
+##  Mean   : -58                         Mean   : 25           
+##  3rd Qu.:   0                         3rd Qu.: 40           
+##  Max.   : 167                         Max.   :126           
+##  NA's   :19216                        NA's   :19216         
+##  amplitude_pitch_forearm amplitude_yaw_forearm total_accel_forearm
+##  Min.   :  0             Length:19622          Min.   :  0.0      
+##  1st Qu.:  2             Class :character      1st Qu.: 29.0      
+##  Median : 84             Mode  :character      Median : 36.0      
+##  Mean   :139                                   Mean   : 34.7      
+##  3rd Qu.:350                                   3rd Qu.: 41.0      
+##  Max.   :360                                   Max.   :108.0      
+##  NA's   :19216                                                    
+##  var_accel_forearm avg_roll_forearm stddev_roll_forearm var_roll_forearm
+##  Min.   :  0       Min.   :-177     Min.   :  0         Min.   :    0   
+##  1st Qu.:  7       1st Qu.:  -1     1st Qu.:  0         1st Qu.:    0   
+##  Median : 21       Median :  11     Median :  8         Median :   64   
+##  Mean   : 34       Mean   :  33     Mean   : 42         Mean   : 5274   
+##  3rd Qu.: 51       3rd Qu.: 107     3rd Qu.: 85         3rd Qu.: 7289   
+##  Max.   :173       Max.   : 177     Max.   :179         Max.   :32102   
+##  NA's   :19216     NA's   :19216    NA's   :19216       NA's   :19216   
+##  avg_pitch_forearm stddev_pitch_forearm var_pitch_forearm avg_yaw_forearm
+##  Min.   :-68       Min.   : 0           Min.   :   0      Min.   :-155   
+##  1st Qu.:  0       1st Qu.: 0           1st Qu.:   0      1st Qu.: -26   
+##  Median : 12       Median : 6           Median :  30      Median :   0   
+##  Mean   : 12       Mean   : 8           Mean   : 140      Mean   :  18   
+##  3rd Qu.: 28       3rd Qu.:13           3rd Qu.: 166      3rd Qu.:  86   
+##  Max.   : 72       Max.   :48           Max.   :2280      Max.   : 169   
+##  NA's   :19216     NA's   :19216        NA's   :19216     NA's   :19216  
+##  stddev_yaw_forearm var_yaw_forearm gyros_forearm_x   gyros_forearm_y 
+##  Min.   :  0        Min.   :    0   Min.   :-22.000   Min.   : -7.02  
+##  1st Qu.:  1        1st Qu.:    0   1st Qu.: -0.220   1st Qu.: -1.46  
+##  Median : 25        Median :  612   Median :  0.050   Median :  0.03  
+##  Mean   : 45        Mean   : 4640   Mean   :  0.158   Mean   :  0.08  
+##  3rd Qu.: 86        3rd Qu.: 7368   3rd Qu.:  0.560   3rd Qu.:  1.62  
+##  Max.   :198        Max.   :39009   Max.   :  3.970   Max.   :311.00  
+##  NA's   :19216      NA's   :19216                                     
+##  gyros_forearm_z  accel_forearm_x  accel_forearm_y accel_forearm_z 
+##  Min.   : -8.09   Min.   :-498.0   Min.   :-632    Min.   :-446.0  
+##  1st Qu.: -0.18   1st Qu.:-178.0   1st Qu.:  57    1st Qu.:-182.0  
+##  Median :  0.08   Median : -57.0   Median : 201    Median : -39.0  
+##  Mean   :  0.15   Mean   : -61.7   Mean   : 164    Mean   : -55.3  
+##  3rd Qu.:  0.49   3rd Qu.:  76.0   3rd Qu.: 312    3rd Qu.:  26.0  
+##  Max.   :231.00   Max.   : 477.0   Max.   : 923    Max.   : 291.0  
+##                                                                    
+##  magnet_forearm_x magnet_forearm_y magnet_forearm_z    classe         
+##  Min.   :-1280    Min.   :-896     Min.   :-973     Length:19622      
+##  1st Qu.: -616    1st Qu.:   2     1st Qu.: 191     Class :character  
+##  Median : -378    Median : 591     Median : 511     Mode  :character  
+##  Mean   : -313    Mean   : 380     Mean   : 394                       
+##  3rd Qu.:  -73    3rd Qu.: 737     3rd Qu.: 653                       
+##  Max.   :  672    Max.   :1480     Max.   :1090                       
+## 
+```
+
+---
+
+## Classe class
+
+```r
+table(training$classe)
+```
+
+```
+## 
+##    A    B    C    D    E 
+## 5580 3797 3422 3216 3607
+```
+
+```r
+table(testing$classe)
+```
+
+```
+## < table of extent 0 >
+```
+
+---
+
+## Classe class
+
+```r
+summary(training$classe)
+```
+
+```
+##    Length     Class      Mode 
+##     19622 character character
+```
+
+---
+
+## Classe class
+
+```r
+str(training$classe)
+```
+
+```
+##  chr [1:19622] "A" "A" "A" "A" "A" "A" "A" "A" "A" ...
+```
+
+---
+                     
+                     
 
 
 

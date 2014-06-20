@@ -2,7 +2,7 @@
 title       : Project1
 subtitle    : Practical Machine Learning
 author      : Santiago Mota
-job         : 
+job         : Coursera
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : tomorrow      # 
@@ -11,15 +11,97 @@ mode        : selfcontained # {standalone, draft}
 knit        : slidify::knit2slides
 ---
 
-## Read-And-Delete
+## Open data
 
-1. Edit YAML front matter
-2. Write using R Markdown
-3. Use an empty line followed by three dashes to separate slides!
+```{r}
+library(caret)
 
---- .class #id 
+# Create data directory
+if(!file.exists("./data")){dir.create("./data")}
 
-## Slide 2
+# Download train file
+urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+download.file(urls, "./data/pml-training.csv")
+
+# Download test file
+urls <- ("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+download.file(urls, "./data/pml-testing.csv")
+```
+
+---
+
+## Open data
+```{r}
+# Change to data directory
+setwd("./data/")
+
+# Load datasets
+training <- read.csv("pml-training.csv", header=TRUE, sep=",",
+                     stringsAsFactors=FALSE)
+testing  <- read.csv("pml-testing.csv", header=TRUE, sep=",",
+                     stringsAsFactors=FALSE)
+```
+
+---
+
+## Some analysis
+```{r}
+str(training)
+```
+
+---
+
+## Some analysis
+```{r}
+summary(training)
+```
+
+---
+
+## Classe class
+```{r}
+table(training$classe)
+table(testing$classe)
+```
+
+---
+
+## Classe class
+```{r}
+summary(training$classe)
+```
+
+---
+
+## Classe class
+```{r}
+str(training$classe)
+```
+
+---
+                     
+## Plots
+```{r}
+hist(as.numeric(as.factor(training$classe)))
+```
+
+---                     
+
+## Plots
+```{r}
+boxplot(as.numeric(as.factor(training$classe)))
+```
+
+---  
+
+## Plots
+```{r}
+featurePlot(x=training[,c("user_name","new_window","num_window", "X")],
+            y = training$classe,
+            plot="pairs")
+```
+
+---  
 
 
 
