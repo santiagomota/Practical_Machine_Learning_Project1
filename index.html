@@ -14868,7 +14868,16 @@ print(model30)
 ## Levels: A B C D E
 </code></pre>
 
-<pre><code class="r">confusionMatrix(pred30_train, training_mod3$classe)
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-39" style="background:;">
+  <hgroup>
+    <h2>Random Forest</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">confusionMatrix(pred30_train, training_mod3$classe)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics
@@ -14908,7 +14917,7 @@ print(model30)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-39" style="background:;">
+<slide class="" id="slide-40" style="background:;">
   <hgroup>
     <h2>Bagging</h2>
   </hgroup>
@@ -14932,7 +14941,7 @@ table(pred31_train, training_mod3$classe)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-40" style="background:;">
+<slide class="" id="slide-41" style="background:;">
   <hgroup>
     <h2>Bagging</h2>
   </hgroup>
@@ -14952,7 +14961,7 @@ print(model31)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-41" style="background:;">
+<slide class="" id="slide-42" style="background:;">
   <hgroup>
     <h2>Bagging</h2>
   </hgroup>
@@ -14964,7 +14973,16 @@ print(model31)
 ## Levels: A B C D E
 </code></pre>
 
-<pre><code class="r">confusionMatrix(pred31_train, training_mod3$classe)
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-43" style="background:;">
+  <hgroup>
+    <h2>Bagging</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">confusionMatrix(pred31_train, training_mod3$classe)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics
@@ -15004,19 +15022,13 @@ print(model31)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-42" style="background:;">
+<slide class="" id="slide-44" style="background:;">
   <hgroup>
     <h2>C5.0</h2>
   </hgroup>
   <article data-timings="">
     <pre><code class="r">model32 &lt;- train(classe ~., method = &quot;C5.0&quot;, data=training_mod3)
-</code></pre>
-
-<pre><code>## Loading required package: C50
-## Loading required package: plyr
-</code></pre>
-
-<pre><code class="r">pred32_train &lt;- predict(model32, training_mod3)
+pred32_train &lt;- predict(model32, training_mod3)
 table(pred32_train, training_mod3$classe)
 </code></pre>
 
@@ -15033,7 +15045,7 @@ table(pred32_train, training_mod3$classe)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-43" style="background:;">
+<slide class="" id="slide-45" style="background:;">
   <hgroup>
     <h2>C5.0</h2>
   </hgroup>
@@ -15078,7 +15090,7 @@ print(model32)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-44" style="background:;">
+<slide class="" id="slide-46" style="background:;">
   <hgroup>
     <h2>C5.0</h2>
   </hgroup>
@@ -15090,7 +15102,16 @@ print(model32)
 ## Levels: A B C D E
 </code></pre>
 
-<pre><code class="r">confusionMatrix(pred32_train, training_mod3$classe)
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-47" style="background:;">
+  <hgroup>
+    <h2>C5.0</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">confusionMatrix(pred32_train, training_mod3$classe)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics
@@ -15130,7 +15151,7 @@ print(model32)
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-45" style="background:;">
+<slide class="" id="slide-48" style="background:;">
   <article data-timings="">
     
   </article>
@@ -15371,7 +15392,7 @@ print(model32)
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=39 title='Bagging'>
+        data-slide=39 title='Random Forest'>
          39
       </a>
     </li>
@@ -15389,13 +15410,13 @@ print(model32)
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=42 title='C5.0'>
+        data-slide=42 title='Bagging'>
          42
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=43 title='C5.0'>
+        data-slide=43 title='Bagging'>
          43
       </a>
     </li>
@@ -15407,8 +15428,26 @@ print(model32)
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=45 title=''>
+        data-slide=45 title='C5.0'>
          45
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=46 title='C5.0'>
+         46
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=47 title='C5.0'>
+         47
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=48 title=''>
+         48
       </a>
     </li>
   </ul>

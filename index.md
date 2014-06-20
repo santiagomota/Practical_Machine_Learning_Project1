@@ -14761,6 +14761,10 @@ pred30
 ## Levels: A B C D E
 ```
 
+---
+
+## Random Forest
+
 ```r
 confusionMatrix(pred30_train, training_mod3$classe)
 ```
@@ -14850,6 +14854,10 @@ pred31
 ## Levels: A B C D E
 ```
 
+---
+
+## Bagging
+
 ```r
 confusionMatrix(pred31_train, training_mod3$classe)
 ```
@@ -14894,14 +14902,6 @@ confusionMatrix(pred31_train, training_mod3$classe)
 
 ```r
 model32 <- train(classe ~., method = "C5.0", data=training_mod3)
-```
-
-```
-## Loading required package: C50
-## Loading required package: plyr
-```
-
-```r
 pred32_train <- predict(model32, training_mod3)
 table(pred32_train, training_mod3$classe)
 ```
@@ -14971,6 +14971,10 @@ pred32
 ## Levels: A B C D E
 ```
 
+---
+
+## C5.0
+
 ```r
 confusionMatrix(pred32_train, training_mod3$classe)
 ```
@@ -15010,8 +15014,6 @@ confusionMatrix(pred32_train, training_mod3$classe)
 ```
 
 ---
-
-
 
 
 
